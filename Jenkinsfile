@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        SONARQUBE_ENV = 'SonarQube'   // name configured under Manage Jenkins → Configure System
+        SONARQUBE_ENV = 'SonarQube'   // Name configured under Manage Jenkins → Configure System
         SONAR_TOKEN = credentials('SONAR_TOKEN')
         SONAR_HOST_URL = '65.0.94.155:9000'
         PATH = "/opt/sonar-scanner/bin:$PATH"
@@ -31,13 +31,14 @@ pipeline {
                 }
             }
         }
+
         stage('Quality Gate') {
-    steps {
-        timeout(time: 2, unit: 'MINUTES') {
-            waitForQualityGate abortPipeline: true
-        }
-    }
-}
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
     }
 
     post {
