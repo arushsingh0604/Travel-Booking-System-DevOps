@@ -4,8 +4,8 @@ pipeline {
     environment {
         SONARQUBE_ENV = 'SonarQube'   // name configured under Manage Jenkins → Configure System
         SONAR_TOKEN = credentials('SONAR_TOKEN')
-        SONAR_HOST_URL = '65.0.94.155:9000' // Note: Protocol (http://) is added in the sh step
-        PATH = "/opt/sonar-scanner/bin:$PATH" // Manually adding scanner to PATH
+        SONAR_HOST_URL = '65.0.94.155:9000'
+        PATH = "/opt/sonar-scanner/bin:$PATH"
     }
 
     stages {
@@ -25,36 +25,30 @@ pipeline {
                           -Dsonar.projectKey=Travel-Booking-System \
                           -Dsonar.projectName="Travel Booking System" \
                           -Dsonar.sources=. \
-                          -Dsonar.host.url=http://65.0.94.155:9000 \ // Added http:// and used variable
+                          -Dsonar.host.url=http://65.0.94.155:9000 \
                           -Dsonar.login=${SONAR_TOKEN}
                     '''
                 }
             }
         }
-
         stage('Quality Gate') {
-            steps {
-                // Wait max 2 minutes for SonarQube analysis to complete and check quality gate status
-                timeout(time: 2, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
-    } // End of stages
+    steps {
+        timeout(time: 2, unit: 'MINUTES') {
+            waitForQualityGate abortPipeline: true
+        }
+    }
+}
+    }
 
     post {
         always {
             echo 'Pipeline completed.'
         }
         success {
-            echo 'SonarQube scan completed successfully and passed Quality Gate.'
+            echo 'SonarQube scan completed successfully.'
         }
         failure {
-            echo 'Pipeline failed (check logs or Quality Gate status).'
+            echo 'SonarQube scan failed.'
         }
-        // Specific status for Quality Gate failure if needed
-        // unstable {
-        //     echo 'Pipeline unstable: SonarQube Quality Gate failed.'
-        // }
-    } // End of post
-} // End of pipeline
+    }
+}
