@@ -3,7 +3,7 @@ pipeline {
 
     // *** CORRECTED: Use the full plugin identifier for the tool type ***
     tools {
-        hudson.plugins.sonar.SonarRunnerInstallation'SonarScanner-Latest' // Use the name you configured
+        sonarQubeScanner 'SonarScanner-Latest' // Use the name you configured
     }
 
     environment {
