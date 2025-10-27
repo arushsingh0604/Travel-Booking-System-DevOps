@@ -25,7 +25,7 @@ pipeline {
                           -Dsonar.projectKey=Travel-Booking-System \
                           -Dsonar.projectName="Travel Booking System" \
                           -Dsonar.sources=. \
-                          -Dsonar.host.url=${SONAR_HOST_URL} \
+                          -Dsonar.host.url=http://65.0.94.155:9000 \
                           -Dsonar.login=${SONAR_TOKEN}
                     '''
                 }
