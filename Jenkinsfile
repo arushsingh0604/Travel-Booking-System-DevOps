@@ -1,13 +1,8 @@
 pipeline {
     agent any
 
-    tools {
-        // ✅ Use the correct SonarScanner tool identifier
-        hudson.plugins.sonar.SonarRunnerInstallation 'SonarScanner-Latest'
-    }
-
     environment {
-        SONARQUBE_ENV = 'SonarQube'   // name as configured in Jenkins → Configure System
+        SONARQUBE_ENV = 'SonarQube'   // name configured under Manage Jenkins → Configure System
         SONAR_TOKEN = credentials('SONAR_TOKEN')
         SONAR_HOST_URL = 'http://65.0.94.155:9000'
     }
@@ -42,10 +37,10 @@ pipeline {
             echo 'Pipeline completed.'
         }
         success {
-            echo 'Pipeline succeeded!'
+            echo 'SonarQube scan completed successfully.'
         }
         failure {
-            echo 'Pipeline failed!'
+            echo 'SonarQube scan failed.'
         }
     }
 }
