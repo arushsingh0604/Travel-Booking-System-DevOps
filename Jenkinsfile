@@ -1,5 +1,8 @@
 pipeline {
     agent any // Run on any available agent
+    tools {
+        sonarqube 'SonarScanner-Latest' // Use the name you configured
+    }
 
     environment {
         SONARQUBE_ENV = 'SonarQube'          // Jenkins SonarQube server configuration name
