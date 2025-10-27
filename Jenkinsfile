@@ -3,7 +3,7 @@ pipeline {
 
     tools {
         // ✅ Use the correct SonarScanner tool identifier
-        hudson.plugins.sonar.SonarRunnerInstallation('SonarScanner-Latest')
+        hudson.plugins.sonar.SonarRunnerInstallation 'SonarScanner-Latest'
     }
 
     environment {
