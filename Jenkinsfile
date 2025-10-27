@@ -2,35 +2,32 @@ pipeline {
     agent any // Run on any available agent
 
     environment {
-        SONARQUBE_ENV = 'SonarQube'          // Jenkins SonarQube server configuration name (from Configure System)
-        SONAR_TOKEN = credentials('SONAR_TOKEN') // Jenkins secret text credential ID for the SonarQube token
-        // !!! IMPORTANT: Define the URL of your SonarQube server here !!!
-        SONAR_HOST_URL = 'http://your-sonarqube-server-ip:9000'
-        // If your project requires Java 17 and Maven for Sonar analysis, ensure they are available on the agent
-        // Or add tools section:
-        // JAVA_HOME = tool 'jdk17' // Assuming 'jdk17' is configured in Global Tool Configuration
-        // MAVEN_HOME = tool 'maven3' // Assuming 'maven3' is configured
-        // PATH = "${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${env.PATH}"
+        SONARQUBE_ENV = 'SonarQube'          // Jenkins SonarQube server configuration name
+        SONAR_TOKEN = credentials('SONAR_TOKEN') // Jenkins secret text credential ID
+        SONAR_HOST_URL = 'http://65.0.94.155:9000' // URL of your SonarQube server
+        // Add tools section if needed (see previous examples if sonar-scanner isn't globally available)
+        // tools { sonarqube 'SonarScanner-Latest' } // Uncomment and configure if needed
     }
 
+    // *** CORRECTED: Added the main 'stages' block here ***
     stages {
-        stage('Checkout') { // Define a stage named 'Checkout'
+
+        // *** CORRECTED: Added the Checkout stage (assuming you still need it) ***
+        stage('Checkout') {
             steps {
-                // Clone the specified Git repository and branch
                 echo "Checking out code from GitHub..."
+                // Using the original project repo, change if needed
                 git branch: 'main', url: 'https://github.com/Msocial123/Travel-Booking-System.git'
             }
         }
 
-        // CORRECTED: SonarQube stage is now directly under the main 'stages' block
+        // *** CORRECTED: SonarQube stage is now INSIDE the main 'stages' block ***
         stage('SonarQube Analysis') {
             steps {
                 echo "Running SonarQube analysis..."
                 // Use withSonarQubeEnv to configure scanner connection based on Jenkins settings
                 withSonarQubeEnv(env.SONARQUBE_ENV) {
                     // Execute the sonar-scanner command
-                    // Assumes sonar-scanner is installed and in PATH on the agent
-                    // Or use Maven/Gradle goals if it's a Maven/Gradle project
                     sh '''
                         sonar-scanner \
                           -Dsonar.projectKey=Travel-Booking-System \
@@ -44,7 +41,7 @@ pipeline {
         }
         // Add more stages here (e.g., Build, Test, Deploy)
 
-    } // End of main stages block
+    } // *** CORRECTED: This brace now correctly closes the main 'stages' block ***
 
     post { // Define actions to run after the pipeline finishes
         always { // Always run this block, regardless of pipeline status
@@ -57,4 +54,4 @@ pipeline {
             echo 'Pipeline failed!'
         }
     }
-} //
+} // End of pipeline
