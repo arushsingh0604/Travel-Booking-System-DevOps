@@ -47,9 +47,35 @@ pipeline {
         }
         success {
             echo 'SonarQube scan completed successfully.'
+            emailext(
+                to: 'arushsingh0604@gmail.com',
+                subject: "✅ SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+                <p>Hi Arush,</p>
+                <p>The Jenkins pipeline for <b>${env.JOB_NAME}</b> completed successfully.</p>
+                <p><b>Build URL:</b> <a href='${env.BUILD_URL}'>${env.BUILD_URL}</a></p>
+                <p>Quality Gate passed successfully ✅</p>
+                <p>Regards,<br>Jenkins CI</p>
+                """,
+                mimeType: 'text/html'
+            )
         }
         failure {
             echo 'SonarQube scan failed.'
+            emailext(
+                to: 'arushsingh0604@gmail.com',
+                subject: "❌ FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+                <p>Hi Arush,</p>
+                <p>The Jenkins pipeline for <b>${env.JOB_NAME}</b> has failed due to a Quality Gate error or pipeline issue.</p>
+                <p><b>Build URL:</b> <a href='${env.BUILD_URL}'>${env.BUILD_URL}</a></p>
+                <p>Please review the SonarQube dashboard for more details:<br>
+                <a href='http://${env.SONAR_HOST_URL}/dashboard?id=Travel-Booking-System'>
+                SonarQube Project Dashboard</a></p>
+                <p>Regards,<br>Jenkins CI</p>
+                """,
+                mimeType: 'text/html'
+            )
         }
     }
 }
