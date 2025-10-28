@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  backend:
+    image: ${DOCKERHUB_REPO}:backend-${DOCKER_IMAGE_TAG}
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=db
+    networks:
+      - travelnet
+    volumes:
+      - backend_data:/var/lib/travel-backend
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+
+  frontend:
+    image: ${DOCKERHUB_REPO}:frontend-${DOCKER_IMAGE_TAG}
+    networks:
+      - travelnet
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - travelnet
+
+networks:
+  travelnet:
+    driver: bridge
+
+volumes:
+  backend_data:
+  pgdata:
