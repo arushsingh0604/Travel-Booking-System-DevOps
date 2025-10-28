@@ -1,38 +1,53 @@
-# ---- FRONTEND BUILD STAGE ----
-FROM node:18-alpine AS frontend
-WORKDIR /app/frontend
-COPY frontend/package*.json ./
-RUN npm install
-COPY frontend/ .
-RUN npm run build
-
-# ---- BACKEND RUNTIME STAGE ----
+# Use a Node.js base image
 FROM node:18-alpine
 
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy dependencies first for better caching
-COPY backend/package*.json ./
+# Copy package files for both frontend and backend
+# Copy backend first
+COPY backend/package*.json ./backend/
+# Copy frontend (assuming it's in a subdirectory)
+COPY frontend/package*.json ./frontend/
+
+# Install backend dependencies
+WORKDIR /app/backend
 RUN npm install
 
-# Copy backend source code
+# Install frontend dependencies
+WORKDIR /app/frontend
+RUN npm install
+
+# Go back to the main app directory
+WORKDIR /app
+
+# Copy the rest of the backend code
 COPY backend/ .
 
-# Copy built frontend assets from the frontend stage
-COPY --from=frontend /app/frontend/build ./public
+# Copy the rest of the frontend code
+COPY frontend/ ./frontend/
+
+# Build the frontend (if necessary)
+WORKDIR /app/frontend
+RUN npm run build
+# Copy the built frontend assets to the backend's public directory
+# Adjust paths as needed for your project structure
+RUN cp -r build/* ../public/
+
+# Go back to the main app directory (where server.js likely is)
+WORKDIR /app
 
 # Create a non-root user and group
-# '-S' creates a system user/group (specific to Alpine)
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-# Change ownership of the app directory to the new user
+# Change ownership (adjust path if server.js is not in /app)
 RUN chown -R appuser:appgroup /app
 
 # Switch to the non-root user
 USER appuser
 
-# Expose the port the app runs on
+# Expose the port the backend runs on
 EXPOSE 8080
 
-# Command to run the application
+# Command to run the backend server
 CMD ["node", "server.js"]
