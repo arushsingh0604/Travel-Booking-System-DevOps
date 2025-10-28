@@ -4,7 +4,7 @@ pipeline {
     environment {
         SONARQUBE_ENV = 'SonarQube'   // Name configured under Manage Jenkins → Configure System
         SONAR_TOKEN = credentials('SONAR_TOKEN')
-        SONAR_HOST_URL = '65.0.94.155:9000'
+        SONAR_HOST_URL = '3.110.187.200:9000'
         PATH = "/opt/sonar-scanner/bin:$PATH"
     }
 
@@ -25,7 +25,7 @@ pipeline {
                           -Dsonar.projectKey=Travel-Booking-System \
                           -Dsonar.projectName="Travel Booking System" \
                           -Dsonar.sources=. \
-                          -Dsonar.host.url=http://65.0.94.155:9000 \
+                          -Dsonar.host.url=http://3.110.187.200:9000 \
                           -Dsonar.login=${SONAR_TOKEN}
                     '''
                 }
