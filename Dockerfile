@@ -1,31 +1,24 @@
 # Use official Node.js LTS image
-FROM node:20-alpine AS base
+FROM node:20-alpine
 
 # Set working directory
 WORKDIR /app
 
-# Copy dependency files first
+# Copy only necessary files for a quick test
 COPY package*.json ./
 
-# Install production dependencies
-RUN npm ci --only=production
+# Install dependencies (use npm install instead of ci for flexibility)
+RUN npm install
 
-# Copy only necessary application code (safe recursive copy)
-COPY config ./config
-COPY controllers ./controllers
-COPY models ./models
-COPY public ./public
-COPY routes ./routes
-COPY utils ./utils
-COPY server.js ./
-# (Add other specific entry points if any)
+# Copy the main server file only
+COPY server.js .
 
-# Create a non-root user for security
+# Create a non-root user (still important for security)
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 
-# Expose app port
+# Expose your backend port
 EXPOSE 3000
 
-# Define default command
+# Start the app
 CMD ["node", "server.js"]
