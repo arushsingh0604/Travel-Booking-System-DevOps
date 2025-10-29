@@ -1,4 +1,4 @@
-# TravelEase - Travel Booking Platformmmm
+# TravelEase - Travel Booking Platform
 
 ## Project Structure
 
