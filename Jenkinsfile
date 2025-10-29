@@ -14,21 +14,18 @@ pipeline {
     parameters {
         string(name: 'DOCKER_IMAGE_TAG', defaultValue: 'v1.0', description: 'Docker image tag')
         string(name: 'REPO_NAME', defaultValue: 'travel-booking-system', description: 'Docker image base name')
-        string(name: 'ECR_REPO', defaultValue: '881490098879.dkr.ecr.ap-south-1.amazonaws.com/devops/travel-booking-system', description: 'AWS ECR repository for combined image')
-        string(name: 'DOCKERHUB_REPO', defaultValue: 'arushsingh246/travel-booking-system', description: 'DockerHub repository for combined image')
+        string(name: 'ECR_REPO', defaultValue: '881490098879.dkr.ecr.ap-south-1.amazonaws.com/devops/travel-booking-system', description: 'AWS ECR repository')
+        string(name: 'DOCKERHUB_REPO', defaultValue: 'arushsingh246/travel-booking-system', description: 'DockerHub repository')
     }
 
     stages {
-
-        // ---------------- STAGE 1 ----------------
         stage('Checkout Code') {
             steps {
-                echo "📥 Checking out code from GitHub..."
+                echo "📥 Checking out code..."
                 git branch: 'main', url: 'https://github.com/Msocial123/Travel-Booking-System.git'
             }
         }
 
-        // ---------------- STAGE 2 ----------------
         stage('SonarQube Analysis') {
             steps {
                 echo "🔍 Running SonarQube analysis..."
@@ -45,7 +42,6 @@ pipeline {
             }
         }
 
-        // ---------------- STAGE 3 ----------------
         stage('Quality Gate') {
             steps {
                 timeout(time: 3, unit: 'MINUTES') {
@@ -54,37 +50,33 @@ pipeline {
             }
         }
 
-        // ---------------- STAGE 4 ----------------
         stage('Build Docker Image') {
             steps {
-                echo "🐳 Building single Docker image (frontend + backend)..."
+                echo "🐳 Building Docker image..."
                 sh """
-                    docker build -t ${REPO_NAME}:${DOCKER_IMAGE_TAG} .
+                    docker build --no-cache -t ${REPO_NAME}:${DOCKER_IMAGE_TAG} .
                 """
             }
         }
 
-        // ---------------- STAGE 5 ----------------
         stage('Security Scan - Trivy') {
             steps {
-                echo "🛡 Running Trivy security scan on built Docker image..."
+                echo "🛡 Running Trivy security scan..."
                 sh """
-                    trivy image ${REPO_NAME}:${DOCKER_IMAGE_TAG} --severity CRITICAL,HIGH --exit-code 1 --ignore-unfixed || exit 1
+                    trivy image --exit-code 1 --severity CRITICAL,HIGH --ignore-unfixed ${REPO_NAME}:${DOCKER_IMAGE_TAG} || exit 1
                 """
             }
         }
 
-        // ---------------- STAGE 6 ----------------
         stage('Push to AWS ECR & DockerHub') {
             steps {
                 script {
-                    echo "🚀 Pushing Docker image to AWS ECR and DockerHub..."
+                    echo "🚀 Pushing Docker image to ECR and DockerHub..."
 
                     // --- AWS ECR ---
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_CREDS']]) {
                         sh """
                             aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin 881490098879.dkr.ecr.ap-south-1.amazonaws.com
-
                             docker tag ${REPO_NAME}:${DOCKER_IMAGE_TAG} ${ECR_REPO}:${DOCKER_IMAGE_TAG}
                             docker push ${ECR_REPO}:${DOCKER_IMAGE_TAG}
                         """
@@ -102,50 +94,43 @@ pipeline {
             }
         }
 
-        // ---------------- STAGE 7 ----------------
         stage('Compose Validation (Optional)') {
             steps {
-                echo "🧩 Validating docker-compose.yml syntax (optional)..."
+                echo "🧩 Validating docker-compose.yml..."
                 sh "docker-compose config || true"
             }
         }
     }
 
-    // ---------------- POST ACTIONS ----------------
     post {
         always {
             echo '📦 Pipeline completed.'
         }
-
         success {
-            echo '✅ All checks passed. Build and push successful.'
+            echo '✅ All checks passed.'
             emailext(
                 to: 'arushsingh0604@gmail.com',
                 subject: "✅ SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                 body: """
                     <p>Hi Arush,</p>
                     <p>The pipeline for <b>${env.JOB_NAME}</b> completed successfully.</p>
-                    <p><b>Build URL:</b> <a href='${env.BUILD_URL}'>${env.BUILD_URL}</a></p>
-                    <p>Quality Gate ✅ and Security Scan ✅ passed successfully.</p>
-                    <p>Docker image <b>${REPO_NAME}:${DOCKER_IMAGE_TAG}</b> pushed to ECR and DockerHub.</p>
+                    <p>Build URL: <a href='${env.BUILD_URL}'>${env.BUILD_URL}</a></p>
+                    <p>Docker image <b>${REPO_NAME}:${DOCKER_IMAGE_TAG}</b> pushed to ECR & DockerHub.</p>
                     <p>Regards,<br>Jenkins CI</p>
                 """,
                 mimeType: 'text/html'
             )
         }
-
         failure {
-            echo '❌ Pipeline failed due to Quality Gate or Security issue.'
+            echo '❌ Pipeline failed.'
             emailext(
                 to: 'arushsingh0604@gmail.com',
                 subject: "❌ FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                 body: """
                     <p>Hi Arush,</p>
                     <p>The pipeline for <b>${env.JOB_NAME}</b> failed.</p>
-                    <p>Please review the SonarQube and Trivy scan results for details:</p>
-                    <p><a href='http://${env.SONAR_HOST_URL}/dashboard?id=Travel-Booking-System'>SonarQube Dashboard</a></p>
-                    <p><b>Build URL:</b> <a href='${env.BUILD_URL}'>${env.BUILD_URL}</a></p>
-                    <p>Regards,<br>Jenkins CI</p>
+                    <p>Check SonarQube and Trivy for details.</p>
+                    <p><a href='${SONAR_HOST_URL}/dashboard?id=Travel-Booking-System'>Sonar Dashboard</a></p>
                 """,
                 mimeType: 'text/html'
             )
