@@ -17,7 +17,7 @@ COPY models ./models
 COPY public ./public
 COPY routes ./routes
 COPY utils ./utils
-COPY app.js ./
+COPY server.js ./
 # (Add other specific entry points if any)
 
 # Create a non-root user for security
@@ -28,4 +28,4 @@ USER appuser
 EXPOSE 3000
 
 # Define default command
-CMD ["node", "app.js"]
+CMD ["node", "server.js"]
