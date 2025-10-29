@@ -1,28 +1,31 @@
-# Use a specific Node.js LTS version for stability and security
-FROM node:18.20.3-alpine AS base
+# Use official Node.js LTS image
+FROM node:20-alpine AS base
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files first for caching
+# Copy dependency files first
 COPY package*.json ./
 
-# Install only production dependencies
+# Install production dependencies
 RUN npm ci --only=production
 
-# Copy only required app files safely
-# Adjust according to your repo contents
-COPY . ./
+# Copy only necessary application code (safe recursive copy)
+COPY config ./config
+COPY controllers ./controllers
+COPY models ./models
+COPY public ./public
+COPY routes ./routes
+COPY utils ./utils
+COPY app.js ./
+# (Add other specific entry points if any)
 
-# Create non-root user for security
+# Create a non-root user for security
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-RUN chown -R appuser:appgroup /app
-
-# Switch to non-root user
 USER appuser
 
-# Expose the backend port (adjust if your app runs on another)
-EXPOSE 8080
+# Expose app port
+EXPOSE 3000
 
-# Command to run the application
-CMD ["node", "server.js"]
+# Define default command
+CMD ["node", "app.js"]
