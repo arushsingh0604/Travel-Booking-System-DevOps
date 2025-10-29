@@ -4,7 +4,7 @@ pipeline {
     environment {
         SONARQUBE_ENV = 'SonarQube'
         SONAR_TOKEN = credentials('SONAR_TOKEN')
-        SONAR_HOST_URL = '3.110.187.200:9000'
+        SONAR_HOST_URL = '65.0.102.76:9000'
         PATH = "/opt/sonar-scanner/bin:$PATH"
         AWS_DEFAULT_REGION = 'ap-south-1'
         AWS_CREDENTIALS = credentials('AWS_CREDS')
@@ -38,7 +38,7 @@ pipeline {
                           -Dsonar.projectKey=Travel-Booking-System \
                           -Dsonar.projectName='Travel Booking System' \
                           -Dsonar.sources=. \
-                          -Dsonar.host.url=http://13.201.119.60:9000 \
+                          -Dsonar.host.url=http://65.0.102.76:9000 \
                           -Dsonar.login=${SONAR_TOKEN}
                     """
                 }
